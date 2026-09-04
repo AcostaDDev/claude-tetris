@@ -1,0 +1,56 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Issue Triage
+        id: claude-triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Analiza el issue #${{ github.event.issue.number }} del repositorio ${{ github.repository }}.
+
+            Contexto del proyecto: lee CLAUDE.md en la raíz del repo para entender la arquitectura
+            (index.html, style.css y game.js — juego de Tetris en HTML/CSS/JS sin dependencias,
+            estado del juego, loop, mecánica de piezas, locking/scoring, rendering).
+
+            Realiza dos acciones sobre el issue:
+
+            1. Clasifícalo asignando los labels apropiados, eligiendo únicamente entre los labels
+               ya existentes en el repositorio: bug, enhancement, documentation, question,
+               accessibility, "good first issue", "help wanted", duplicate, invalid, wontfix.
+               Aplica solo los que realmente correspondan al contenido del issue (puede ser uno
+               o varios). No crees labels nuevos. Usa `gh issue edit ${{ github.event.issue.number }} --add-label "..."`.
+
+            2. Publica un comentario en el issue (`gh issue comment ${{ github.event.issue.number }} --body "..."`)
+               con un diagnóstico general del problema, en español, que sirva como base para
+               implementar la solución después. El comentario debe incluir:
+               - Resumen breve del problema o solicitud.
+               - Causa probable (si es un bug) o alcance funcional (si es una mejora/pregunta).
+               - Qué archivo(s)/función(es) del código probablemente estén involucrados
+                 (referenciando la arquitectura descrita en CLAUDE.md, p. ej. funciones concretas
+                 de game.js como collide, tryRotate, lockPiece, clearLines, draw, etc.).
+               - Una sugerencia breve de enfoque para abordar la solución.
+
+               Si el issue ya tiene un comentario de diagnóstico previo publicado por este mismo
+               workflow (identifícalo porque sigue esta misma estructura), reemplázalo editando
+               ese comentario en vez de crear uno nuevo, ya que el workflow puede correr de nuevo
+               al editarse el issue.
+
+          claude_args: '--allowedTools "Bash(gh issue edit:*),Bash(gh issue comment:*),Bash(gh issue view:*)"'
