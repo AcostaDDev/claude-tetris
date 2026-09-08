@@ -61,6 +61,13 @@ jobs:
             actualízalo con `gh issue comment ${{ github.event.issue.number }} --edit-last --body "..."`;
             si no, créalo con `gh issue comment ${{ github.event.issue.number }} --body "..."`.
 
+            Todo lo que publiques debe estar escrito en Markdown compatible con
+            GitHub (GitHub Flavored Markdown): encabezados con `#`, listas con `-`,
+            **negritas**, `código` en línea, bloques de código con triple backtick y
+            lenguaje, enlaces `[texto](url)` y tablas si aplica. Asegúrate de que
+            GitHub lo renderice correctamente (líneas en blanco entre párrafos y
+            listas, sin HTML crudo).
+
             El comentario debe empezar con el encabezado exacto
             "## 🔍 Diagnóstico automático" y contener:
             - **Resumen**: el problema o la solicitud en 1-2 frases.
