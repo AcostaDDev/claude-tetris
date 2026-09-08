@@ -160,3 +160,74 @@ kbd {
 #restart-btn:hover {
   background: #9bbdff;
 }
+
+/* ---- Panel de pausa ---- */
+#pause-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  width: 200px;
+}
+
+#pause-panel button {
+  background: #22223a;
+  color: #e0e0e0;
+  border: 1px solid #3a3a5a;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.15s;
+}
+
+#pause-panel button:hover {
+  background: #2e2e4a;
+}
+
+#resume-btn {
+  background: #7aa2f7;
+  color: #0f0f17;
+}
+
+#resume-btn:hover {
+  background: #9bbdff;
+}
+
+.level-select-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #888;
+  text-align: left;
+}
+
+.level-select-label select {
+  background: #22223a;
+  color: #e0e0e0;
+  border: 1px solid #3a3a5a;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+#pause-controls-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+#pause-controls-list li {
+  font-size: 12px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
