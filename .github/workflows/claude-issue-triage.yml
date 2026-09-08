@@ -1,0 +1,78 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+# Evita ejecuciones duplicadas cuando se edita el issue varias veces seguidas.
+concurrency:
+  group: issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    # Solo analiza cuando cambia el issue principal (título/descripción), no comentarios,
+    # y nunca en respuesta a ediciones hechas por bots.
+    if: ${{ !github.event.issue.pull_request && github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude issue triage
+        id: triage
+        # GH_TOKEN permite que Claude use el CLI `gh` desde Bash.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: >-
+            --allowedTools "Bash(gh label list:*),Bash(gh label create:*),Bash(gh issue view:*),Bash(gh issue edit:*),Bash(gh issue comment:*),Read,Grep,Glob"
+          prompt: |
+            Eres el clasificador de issues de este repositorio (Tetris en JavaScript vanilla:
+            game.js contiene toda la lógica, index.html el DOM y los dos canvas, style.css el tema).
+
+            Analiza el issue #${{ github.event.issue.number }}:
+            - Título: ${{ github.event.issue.title }}
+            - Autor: ${{ github.event.issue.user.login }}
+            Lee la descripción completa con `gh issue view ${{ github.event.issue.number }} --json title,body,labels,comments`.
+
+            ## Tarea 1 — Asignar labels
+            1. Lista los labels disponibles con `gh label list`.
+            2. Elige los que mejor describan el issue: tipo (p. ej. bug, enhancement,
+               documentation, question), área afectada y prioridad solo si es evidente.
+            3. Si falta un label claramente necesario, créalo con
+               `gh label create "<nombre>" --description "<desc>" --color "<hex>"`.
+            4. Aplica los labels con
+               `gh issue edit ${{ github.event.issue.number }} --add-label "label-a,label-b"`.
+               No quites labels que ya haya puesto una persona.
+
+            ## Tarea 2 — Diagnóstico general
+            Publica UN comentario en español en el issue. Si ya publicaste antes un
+            comentario de diagnóstico (empieza con "## 🔍 Diagnóstico automático"),
+            actualízalo con `gh issue comment ${{ github.event.issue.number }} --edit-last --body "..."`;
+            si no, créalo con `gh issue comment ${{ github.event.issue.number }} --body "..."`.
+
+            El comentario debe empezar con el encabezado exacto
+            "## 🔍 Diagnóstico automático" y contener:
+            - **Resumen**: el problema o la solicitud en 1-2 frases.
+            - **Archivos probablemente involucrados**: de game.js / index.html / style.css,
+              y funciones concretas si puedes identificarlas (collide, lockPiece, clearLines,
+              tryRotate, draw, loop, init, ...).
+            - **Causa raíz probable / enfoque técnico** sugerido.
+            - **Pasos de alto nivel** para implementar la solución.
+            - **Riesgos y consideraciones** (p. ej. mantener sincronizados COLS/ROWS/BLOCK
+              con el canvas de index.html, las constantes ajustables, el índice compartido
+              color/type/PIECES).
+
+            Este diagnóstico servirá de base para implementar la solución después, así que
+            sé concreto y accionable. No modifiques código en este workflow.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
