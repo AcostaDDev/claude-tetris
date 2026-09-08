@@ -80,6 +80,44 @@ body {
   border-radius: 4px;
 }
 
+/* ---- Selector de skin ---- */
+#skin-select {
+  background: #22223a;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-size: 12px;
+  padding: 6px 8px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+#skin-select:hover {
+  border-color: #7aa2f7;
+}
+
+#skin-select:focus {
+  outline: none;
+  border-color: #7aa2f7;
+}
+
+/* ---- Temas visuales ---- */
+body.theme-neon {
+  background: #000000;
+}
+
+body.theme-neon .game-title {
+  color: #00fff2;
+  text-shadow: 0 0 20px rgba(0, 255, 242, 0.7);
+}
+
+body.theme-neon #board,
+body.theme-neon #next-canvas {
+  background: #000000;
+  border-color: #00fff2;
+  box-shadow: 0 0 20px rgba(0, 255, 242, 0.3);
+}
+
 /* ---- Controles ---- */
 .controls ul {
   list-style: none;
